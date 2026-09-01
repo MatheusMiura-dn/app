@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>My Love</title>
+<style>
+  :root{
+    --bg:#111111;
+    --card:#1a1a1a;
+    --card-2:#1c1c1c;
+    --border:rgba(138,138,138,0.16);
+    --border-mid:rgba(138,138,138,0.30);
+    --border-strong:rgba(138,138,138,0.48);
+    --text:#e8e6e1;
+    --text-dim:#8a8a8a;
+    --text-faint:#6c6c6c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-weight:300;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:20px 24px 48px;
+  }
+
+  /* TOPBAR (só aparece com botão voltar) */
+  .topbar{
+    display:flex;
+    align-items:center;
+    min-height:28px;
+    margin-bottom:8px;
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    padding:10px 0;
+    font-size:13px;
+    font-weight:300;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    gap:8px;
+  }
+  .back-btn svg{display:block;}
+  .back-btn.show{display:inline-flex;}
+  .back-btn:hover{color:var(--text);}
+
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* DIVIDER (linha - coração - linha) */
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin:18px 0;
+  }
+  .divider .line{
+    flex:0 0 36px;
+    height:1px;
+    background:var(--border-mid);
+  }
+  .divider .heart{
+    color:var(--text-faint);
+    flex-shrink:0;
+    display:flex;
+  }
+
+  /* HOME HERO */
+  #home.active{justify-content:flex-start;}
+  .hero{
+    padding-top:28px;
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .wordmark{
+    font-size:28px;
+    font-weight:300;
+    letter-spacing:0.42em;
+    margin:0;
+    color:var(--text);
+  }
+  .hero-sub{
+    font-size:13.5px;
+    color:var(--text-dim);
+    margin:8px 0 0;
+    font-weight:300;
+    letter-spacing:0.02em;
+  }
+
+  .cards{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    margin-top:24px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:44px 24px 36px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    transition:border-color .2s ease, transform .12s ease, background .2s ease;
+  }
+  .card:hover{border-color:var(--border-strong);background:var(--card-2);}
+  .card:active{transform:scale(0.98);}
+  .card-icon{
+    color:var(--text);
+    opacity:0.92;
+    margin-bottom:20px;
+  }
+  .card-title{
+    font-size:26px;
+    font-weight:300;
+    letter-spacing:0.24em;
+    margin:0;
+  }
+  .card-desc{
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.6;
+    margin:14px 0 0;
+    font-weight:300;
+    max-width:220px;
+  }
+
+  footer.app-footer{
+    margin-top:auto;
+    padding-top:40px;
+    text-align:center;
+  }
+  footer.app-footer .foot-text{
+    color:var(--text-faint);
+    font-size:11.5px;
+    letter-spacing:0.05em;
+    font-weight:300;
+  }
+
+  /* PAGE HEAD (bom dia / boa noite) */
+  .page-head{
+    text-align:center;
+    padding-top:12px;
+    margin-bottom:8px;
+  }
+  .page-icon{
+    color:var(--text);
+    opacity:0.92;
+    display:flex;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .page-title{
+    font-size:23px;
+    font-weight:300;
+    letter-spacing:0.22em;
+    margin:0;
+  }
+  .page-sub{
+    font-size:13px;
+    color:var(--text-dim);
+    margin:6px 0 0;
+    font-weight:300;
+  }
+
+  /* TOGGLE */
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px 18px;
+    margin:28px 0 30px;
+  }
+  .toggle-label{
+    font-size:13.5px;
+    color:var(--text);
+    font-weight:300;
+  }
+  .switch{
+    position:relative;
+    width:42px;
+    height:24px;
+    flex-shrink:0;
+  }
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .slider{
+    position:absolute;top:0;left:0;right:0;bottom:0;
+    background:transparent;
+    border:1px solid var(--border-mid);
+    border-radius:24px;
+    cursor:pointer;
+    transition:.22s ease;
+  }
+  .slider:before{
+    content:"";
+    position:absolute;
+    width:16px;height:16px;
+    left:3px;top:3px;
+    border:1px solid var(--text-dim);
+    background:transparent;
+    border-radius:50%;
+    transition:.22s ease;
+  }
+  .switch input:checked + .slider{border-color:var(--text-dim);}
+  .switch input:checked + .slider:before{
+    transform:translateX(18px);
+    background:var(--text);
+    border-color:var(--text);
+  }
+
+  /* MESSAGE BLOCKS */
+  .block{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px 20px;
+    margin-bottom:16px;
+  }
+  .block-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.16em;
+    color:var(--text-faint);
+    margin-bottom:12px;
+    font-weight:300;
+  }
+  .block-text{
+    font-size:15px;
+    line-height:1.7;
+    margin-bottom:20px;
+    white-space:pre-wrap;
+    word-break:break-word;
+    color:var(--text);
+    font-weight:300;
+  }
+  .block-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{
+    border:1px solid var(--border-mid);
+    background:transparent;
+    color:var(--text);
+    border-radius:12px;
+    padding:10px 16px;
+    font-size:12.5px;
+    font-weight:300;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    transition:border-color .18s ease, background .18s ease, color .18s ease, transform .1s ease;
+  }
+  .btn:hover{border-color:var(--border-strong);background:rgba(255,255,255,0.02);}
+  .btn:active{transform:scale(0.96);}
+  .btn.copied{background:var(--text);color:var(--bg);border-color:var(--text);}
+  .btn-icon{font-size:13px;line-height:1;}
+
+  .actions-bottom{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:8px;
+  }
+  .btn-primary{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--border-strong);
+    border-radius:14px;
+    padding:15px;
+    font-size:14px;
+    font-weight:300;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    text-align:center;
+    transition:background .18s ease, border-color .18s ease, transform .1s ease;
+  }
+  .btn-primary:hover{background:rgba(255,255,255,0.03);border-color:var(--text-dim);}
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-secondary{
+    background:none;
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    border-radius:14px;
+    padding:14px;
+    font-size:13px;
+    font-weight:300;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    text-align:center;
+    transition:border-color .18s ease, color .18s ease;
+  }
+  .btn-secondary:hover{border-color:var(--border-strong);color:var(--text);}
+  .btn-secondary:active{transform:scale(0.98);}
+
+  .toast{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%) translateY(16px);
+    background:var(--card-2);
+    border:1px solid var(--border-mid);
+    color:var(--text-dim);
+    padding:11px 20px;
+    border-radius:12px;
+    font-size:12.5px;
+    font-weight:300;
+    letter-spacing:0.02em;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:100;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <button class="back-btn" id="backBtn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg>
+      voltar
+    </button>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="home">
+    <div class="hero">
+      <h1 class="wordmark">my love</h1>
+      <div class="divider">
+        <span class="line"></span>
+        <span class="heart">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2 4.8 5 4c2-.5 4 .5 5 2.2C11 4.5 13 3.5 15 4c3 .8 3.8 4 2.3 7-2.3 4.5-9.3 9-9.3 9z"/></svg>
+        </span>
+        <span class="line"></span>
+      </div>
+      <p class="hero-sub">mensagens que tocam o coração</p>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="openScreen('bomdia')">
+        <span class="card-icon">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4.6"/>
+            <line x1="12" y1="1.3" x2="12" y2="4"/>
+            <line x1="12" y1="20" x2="12" y2="22.7"/>
+            <line x1="1.3" y1="12" x2="4" y2="12"/>
+            <line x1="20" y1="12" x2="22.7" y2="12"/>
+            <line x1="4.3" y1="4.3" x2="6.2" y2="6.2"/>
+            <line x1="17.8" y1="17.8" x2="19.7" y2="19.7"/>
+            <line x1="4.3" y1="19.7" x2="6.2" y2="17.8"/>
+            <line x1="17.8" y1="6.2" x2="19.7" y2="4.3"/>
+          </svg>
+        </span>
+        <h2 class="card-title">bom dia</h2>
+        <p class="card-desc">mensagens para começar o dia com amor</p>
+      </div>
+
+      <div class="card" onclick="openScreen('boanoite')">
+        <span class="card-icon">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16.4 4.3c-4.4 0-8 3.6-8 8s3.6 8 8 8c1.2 0 2.3-.25 3.3-.7-3-.9-5.1-3.7-5.1-7.3s2.1-6.4 5.1-7.3c-1-.45-2.1-.7-3.3-.7z"/>
+            <path d="M19.6 7.6l.45 1.1 1.1.45-1.1.45-.45 1.1-.45-1.1-1.1-.45 1.1-.45z"/>
+            <path d="M6.2 14.6l.32.78.78.32-.78.32-.32.78-.32-.78-.78-.32.78-.32z"/>
+          </svg>
+        </span>
+        <h2 class="card-title">boa noite</h2>
+        <p class="card-desc">mensagens para terminar o dia com amor</p>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <div class="divider">
+        <span class="line"></span>
+        <span class="heart">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 20s-7-4.5-9.3-9C1.2 8 2 4.8 5 4c2-.5 4 .5 5 2.2C11 4.5 13 3.5 15 4c3 .8 3.8 4 2.3 7-2.3 4.5-9.3 9-9.3 9z"/></svg>
+        </span>
+        <span class="line"></span>
+      </div>
+      <p class="foot-text">feito com amor para você</p>
+    </footer>
+  </div>
+
+  <!-- BOM DIA -->
+  <div class="screen" id="bomdia">
+    <div class="page-head">
+      <span class="page-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4.6"/>
+          <line x1="12" y1="1.3" x2="12" y2="4"/>
+          <line x1="12" y1="20" x2="12" y2="22.7"/>
+          <line x1="1.3" y1="12" x2="4" y2="12"/>
+          <line x1="20" y1="12" x2="22.7" y2="12"/>
+          <line x1="4.3" y1="4.3" x2="6.2" y2="6.2"/>
+          <line x1="17.8" y1="17.8" x2="19.7" y2="19.7"/>
+          <line x1="4.3" y1="19.7" x2="6.2" y2="17.8"/>
+          <line x1="17.8" y1="6.2" x2="19.7" y2="4.3"/>
+        </svg>
+      </span>
+      <h2 class="page-title">bom dia</h2>
+      <p class="page-sub">gere os blocos e copie do jeito que quiser</p>
+    </div>
+
+    <div class="toggle-row">
+      <span class="toggle-label">hoje é fim de semana?</span>
+      <label class="switch">
+        <input type="checkbox" id="weekendToggle" onchange="onWeekendToggle()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="block">
+      <div class="block-label">saudação</div>
+      <div class="block-text" id="txt-saudacao"></div>
+      <div class="block-actions">
+        <button class="btn" onclick="copyBlock('saudacao', this)"><span class="btn-icon">⧉</span> copiar</button>
+        <button class="btn" onclick="regen('saudacao')"><span class="btn-icon">↻</span> gerar de novo</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-label">cuidado</div>
+      <div class="block-text" id="txt-cuidado"></div>
+      <div class="block-actions">
+        <button class="btn" onclick="copyBlock('cuidado', this)"><span class="btn-icon">⧉</span> copiar</button>
+        <button class="btn" onclick="regen('cuidado')"><span class="btn-icon">↻</span> gerar de novo</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-label" id="label-final">desejo do dia</div>
+      <div class="block-text" id="txt-final"></div>
+      <div class="block-actions">
+        <button class="btn" onclick="copyBlock('final', this)"><span class="btn-icon">⧉</span> copiar</button>
+        <button class="btn" onclick="regen('final')"><span class="btn-icon">↻</span> gerar de novo</button>
+      </div>
+    </div>
+
+    <div class="actions-bottom">
+      <button class="btn-primary" onclick="copyAllBomDia(this)">copiar tudo junto</button>
+      <button class="btn-secondary" onclick="regenAllBomDia()">gerar todos de novo</button>
+    </div>
+  </div>
+
+  <!-- BOA NOITE -->
+  <div class="screen" id="boanoite">
+    <div class="page-head">
+      <span class="page-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16.4 4.3c-4.4 0-8 3.6-8 8s3.6 8 8 8c1.2 0 2.3-.25 3.3-.7-3-.9-5.1-3.7-5.1-7.3s2.1-6.4 5.1-7.3c-1-.45-2.1-.7-3.3-.7z"/>
+          <path d="M19.6 7.6l.45 1.1 1.1.45-1.1.45-.45 1.1-.45-1.1-1.1-.45 1.1-.45z"/>
+          <path d="M6.2 14.6l.32.78.78.32-.78.32-.32.78-.32-.78-.78-.32.78-.32z"/>
+        </svg>
+      </span>
+      <h2 class="page-title">boa noite</h2>
+      <p class="page-sub">mensagem completa, já pronta pra copiar</p>
+    </div>
+
+    <div class="block">
+      <div class="block-label">mensagem</div>
+      <div class="block-text" id="txt-boanoite"></div>
+      <div class="block-actions">
+        <button class="btn" onclick="copyBlock('boanoite', this)"><span class="btn-icon">⧉</span> copiar</button>
+        <button class="btn" onclick="regen('boanoite')"><span class="btn-icon">↻</span> gerar de novo</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">copiado!</div>
+
+<script>
+/* ---------------------------------------------------------
+   CONTEÚDO DAS MENSAGENS
+--------------------------------------------------------- */
+const DATA = {
+  saudacao: [
+    "bom dia meu amorrr",
+    "bomm diaaa meu amorrrrrrrr",
+    "bom dia amor",
+    "bom dia minha linda",
+    "bom dinha minha princesa",
+    "bom dia amorrrrr"
+  ],
+  cuidado: [
+    "como vc ta amor? dormiu bem?",
+    "e ai amor, como foi sua noite de sono? ta bem?",
+    "dormiu bem amor? como q vc ta?",
+    "vc ta bem? dormiu numa boa?",
+    "como foi a noite, dormiu direitinho?",
+    "dormiu bem meu amor? como vc ta hj",
+    "como vc dormiu? e como q vc ta"
+  ],
+  finalSemana: [
+    "espero q seu dia seja mt bom, boa aula/trabalho pra vc, te amo mt",
+    "bom dia de trabalho pra vc, vai com Deus, te amo mt",
+    "que hj seja um dia leve pra vc, boa sorte no q for fazer, te amo mt",
+    "vai com tudo hj, boa aula pra vc, te amo mt",
+    "desejo mt energia pro seu dia, foco total, te amo mt",
+    "que seu dia seja produtivo e tranquilo, te amo mt",
+    "boa sorte no q for fazer hj, manda bem, te amo mt"
+  ],
+  boaNoiteSaudacao: [
+    "boa noite meu amor",
+    "boa noite amor",
+    "boa noiteee meu amor",
+    "boa noite minha princesa",
+    "boa noite meu bem",
+    "boa noite minha linda"
+  ],
+  boaNoiteTranquila: [
+    "que sua noite seja tranquila e que nada de ruim aconteça com vc",
+    "espero q vc tenha uma noite mt boa e tranquila",
+    "que essa noite seja calma e vc descanse direitinho",
+    "durma numa paz, sem preocupação nenhuma, q nada ruim aconteça",
+    "que sua noite seja mt boa, sem nenhum perrengue",
+    "durma bem e com o coração em paz, sem nada de ruim rolando"
+  ],
+  boaNoiteDeus: [
+    "que Deus cuide de vc e esteja em todos os seus pensamentos e caminhos",
+    "peço a Deus q cuide de vc e guie seus caminhos",
+    "que Deus esteja com vc, nos seus pensamentos e em cada passo q vc der",
+    "Deus na sua vida, nos seus caminhos e pensamentos sempre",
+    "que Deus cuide de cada passo seu e esteja sempre nos seus pensamentos",
+    "que Deus ilumine seus caminhos e esteja em cada pensamento seu"
+  ],
+  boaNoiteAmor: [
+    "te amo mt, mt mesmo",
+    "te amo mt",
+    "te amo demais",
+    "te amo mt mesmo",
+    "te amo mais q tudo",
+    "te amo mt, do fundo do coração"
+  ],
+  boaNoiteDisponibilidade: [
+    "e se precisar de qualquer coisa, só me chamar ou ligar, ta bem?",
+    "qualquer coisa q precisar pode me chamar, mesmo tarde",
+    "e se precisar de mim é só chamar ou ligar",
+    "e to aqui pra qualquer coisa, só chamar",
+    "e lembra: precisando de algo é só me chamar ou ligar",
+    "precisando de mim, a qualquer hora, é só chamar ou ligar"
+  ]
+};
+
+/* ---------------------------------------------------------
+   SISTEMA DE ROTAÇÃO (embaralha e nunca repete até passar
+   pelas outras opções)
+--------------------------------------------------------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+class Rotator{
+  constructor(items){
+    this.items = items;
+    this.bag = [];
+    this.last = null;
+  }
+  refill(){
+    let b = shuffle(this.items);
+    // evita que o primeiro item do novo bag repita o último exibido
+    if(this.last !== null && b[0] === this.last && b.length > 1){
+      [b[0], b[1]] = [b[1], b[0]];
+    }
+    this.bag = b;
+  }
+  next(){
+    if(this.bag.length === 0) this.refill();
+    const val = this.bag.shift();
+    this.last = val;
+    return val;
+  }
+}
+
+const FRASE_FIM_DE_SEMANA = "e vai fazer oq hj amor?";
+
+const rotators = {
+  saudacao: new Rotator(DATA.saudacao),
+  cuidado: new Rotator(DATA.cuidado),
+  finalSemana: new Rotator(DATA.finalSemana),
+  boaNoiteSaudacao: new Rotator(DATA.boaNoiteSaudacao),
+  boaNoiteTranquila: new Rotator(DATA.boaNoiteTranquila),
+  boaNoiteDeus: new Rotator(DATA.boaNoiteDeus),
+  boaNoiteAmor: new Rotator(DATA.boaNoiteAmor),
+  boaNoiteDisponibilidade: new Rotator(DATA.boaNoiteDisponibilidade)
+};
+
+/* ---------------------------------------------------------
+   ESTADO
+--------------------------------------------------------- */
+const state = {
+  saudacao: "",
+  cuidado: "",
+  final: "",
+  boanoite: "",
+  isWeekend: false
+};
+
+function isTodayWeekend(){
+  const d = new Date().getDay(); // 0 = domingo, 6 = sabado
+  return d === 0 || d === 6;
+}
+
+/* ---------------------------------------------------------
+   NAVEGAÇÃO
+--------------------------------------------------------- */
+function openScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('backBtn').classList.add('show');
+
+  if(id === 'bomdia'){
+    if(!document.getElementById('txt-saudacao').textContent){
+      const weekend = isTodayWeekend();
+      state.isWeekend = weekend;
+      document.getElementById('weekendToggle').checked = weekend;
+      regenAllBomDia();
+    }
+  }
+  if(id === 'boanoite'){
+    if(!document.getElementById('txt-boanoite').textContent){
+      regen('boanoite');
+    }
+  }
+}
+
+function goHome(){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home').classList.add('active');
+  document.getElementById('backBtn').classList.remove('show');
+}
+
+/* ---------------------------------------------------------
+   GERAÇÃO DE TEXTO
+--------------------------------------------------------- */
+function onWeekendToggle(){
+  state.isWeekend = document.getElementById('weekendToggle').checked;
+  regen('final');
+}
+
+function regen(block){
+  if(block === 'final'){
+    state.final = state.isWeekend ? FRASE_FIM_DE_SEMANA : rotators.finalSemana.next();
+    document.getElementById('txt-final').textContent = state.final;
+    document.getElementById('label-final').textContent = state.isWeekend ? 'planos do dia' : 'desejo do dia';
+    return;
+  }
+  if(block === 'boanoite'){
+    const saudacao = rotators.boaNoiteSaudacao.next();
+    const tranquila = rotators.boaNoiteTranquila.next();
+    const deus = rotators.boaNoiteDeus.next();
+    const amor = rotators.boaNoiteAmor.next();
+    const disponibilidade = rotators.boaNoiteDisponibilidade.next();
+    state.boanoite = saudacao + ", " + tranquila + ". " + deus + ". " + amor + ". " + disponibilidade;
+    document.getElementById('txt-boanoite').textContent = state.boanoite;
+    return;
+  }
+  state[block] = rotators[block].next();
+  document.getElementById('txt-' + block).textContent = state[block];
+}
+
+function regenAllBomDia(){
+  regen('saudacao');
+  regen('cuidado');
+  regen('final');
+}
+
+/* ---------------------------------------------------------
+   COPIAR
+--------------------------------------------------------- */
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg || 'copiado!';
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function flashBtn(btn){
+  if(!btn) return;
+  const original = btn.innerHTML;
+  btn.classList.add('copied');
+  btn.innerHTML = '<span class="btn-icon">✓</span> copiado';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = original;
+  }, 1300);
+}
+
+function copyBlock(block, btn){
+  const text = state[block];
+  if(!text) return;
+  copyText(text);
+  flashBtn(btn);
+  showToast('copiado!');
+}
+
+function copyAllBomDia(btn){
+  const full = [state.saudacao, state.cuidado, state.final].filter(Boolean).join('\n\n');
+  copyText(full);
+  showToast('tudo copiado!');
+}
+
+/* ---------------------------------------------------------
+   INIT
+--------------------------------------------------------- */
+document.getElementById('weekendToggle').checked = isTodayWeekend();
+</script>
+
+</body>
+</html>
